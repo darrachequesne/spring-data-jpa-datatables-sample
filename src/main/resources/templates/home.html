@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" type="text/css"
+	href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.css" />
+<title>DataTables</title>
+</head>
+<body>
+	<select id="role_selector" multiple="multiple">
+		<option th:each="role : ${T(sample.model.UserRole).values()}"
+			th:text="${role}"></option>
+	</select>
+
+	<select id="status_selector" multiple="multiple">
+		<option th:each="status : ${T(sample.model.UserStatus).values()}"
+			th:text="${status}"></option>
+	</select>
+
+	<table id="sample" class="table">
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>mail</th>
+				<th>role</th>
+				<th>status</th>
+			</tr>
+		</thead>
+	</table>
+
+	<script type="text/javascript"
+		src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript"
+		src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
+	<script type="text/javascript"
+		th:src="@{/lib/jquery.spring-friendly.js}"></script>
+
+	<script type="text/javascript" th:src="@{/js/home.js}"></script>
+</body>
+</html>
