@@ -10,6 +10,14 @@ $(document).ready(function() {
 			data : 'role'
 		}, {
 			data : 'status'
+		}, {
+			data : 'home__town',
+			render : function(data, type, row) {
+				if (row.home) {
+					return row.home.town;
+				}
+				return '';
+			}
 		} ]
 	});
 
