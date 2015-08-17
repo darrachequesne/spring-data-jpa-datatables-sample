@@ -11,7 +11,7 @@ $(document).ready(function() {
 		}, {
 			data : 'status'
 		}, {
-			data : 'home__town',
+			data : 'home.town',
 			render : function(data, type, row) {
 				if (row.home) {
 					return row.home.town;
