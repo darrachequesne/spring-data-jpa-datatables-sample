@@ -18,6 +18,21 @@ $(document).ready(function() {
 				}
 				return '';
 			}
+		}, {
+			// add another column not persisted on the server-side
+			data : 'anothercolumn',
+			// order is not available
+			orderable : false,
+			// yet filter should be available through the method
+			// findAll(DataTablesInput input, Specification<T>
+			// additionalSpecification)
+			searchable : false,
+			render : function(data, type, row) {
+				if (row.role && row.status) {
+					return row.role + ' and ' + row.status;
+				}
+				return '';
+			}
 		} ]
 	});
 
