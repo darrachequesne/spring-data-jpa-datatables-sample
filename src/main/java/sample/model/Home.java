@@ -1,17 +1,20 @@
 package sample.model;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-
-import com.fasterxml.jackson.annotation.JsonView;
+import java.util.List;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Home {
 
 	@Id
@@ -19,33 +22,11 @@ public class Home {
 	private Integer id;
 
 	@JsonView(DataTablesOutput.View.class)
+	@Setter
 	private String town;
 
 	@OneToMany(mappedBy = "home")
+	@Setter
 	private List<User> inhabitants;
-
-	public Home() {
-		super();
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public String getTown() {
-		return town;
-	}
-
-	public void setTown(String town) {
-		this.town = town;
-	}
-
-	public List<User> getInhabitants() {
-		return inhabitants;
-	}
-
-	public void setInhabitants(List<User> inhabitants) {
-		this.inhabitants = inhabitants;
-	}
 
 }
