@@ -1,14 +1,13 @@
 package sample.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public enum UserRole {
 	ADMIN("admin"), AUTHOR("author"), USER("user");
 
-	@Getter
 	private String role;
 
-	private UserRole(String role) {
-		this.role = role;
-	}
 }

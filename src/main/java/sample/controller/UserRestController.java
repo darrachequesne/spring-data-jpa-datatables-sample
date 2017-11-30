@@ -1,18 +1,13 @@
 package sample.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 import sample.model.Home;
 import sample.model.User;
 import sample.model.UserRole;
@@ -20,7 +15,10 @@ import sample.model.UserStatus;
 import sample.repository.HomeRepository;
 import sample.repository.UserRepository;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import javax.annotation.PostConstruct;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * REST Controller returning {@link DataTablesOutput}
@@ -28,13 +26,11 @@ import com.fasterxml.jackson.annotation.JsonView;
  * @author Damien Arrachequesne
  */
 @RestController
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class UserRestController {
 
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private HomeRepository homeRepository;
+	private final UserRepository userRepository;
+	private final HomeRepository homeRepository;
 
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(value = "/data/users", method = RequestMethod.GET)
@@ -54,10 +50,11 @@ public class UserRestController {
 		for (int i = 0; i < 42; i++) {
 			User user = new User();
 			user.setMail("john" + i + "@doe.com");
-			user.setRole(UserRole.values()[i % 3]);
-			user.setStatus(UserStatus.values()[i % 2]);
-			if (i > 3)
-				user.setHome(homes.get(i % 4));
+			user.setRole(UserRole.values()[i % UserRole.values().length]);
+			user.setStatus(UserStatus.values()[i % UserStatus.values().length]);
+			if (i > 3) {
+				user.setHome(homes.get(i % homes.size()));
+			}
 			userRepository.save(user);
 		}
 	}
