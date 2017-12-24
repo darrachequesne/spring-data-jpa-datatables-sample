@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
+
+    <title>DataTables</title>
+</head>
+<body>
+
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">DataTables</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Basic</a></li>
+                    <li><a href="with-post.html">With POST</a></li>
+                    <li class="active"><a href="advanced.html">Advanced <span class="sr-only">(current)</span></a></li>
+                    <li><a href="scroller.html">Scroller</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <form>
+                <div class="form-group col-md-3">
+                    <label for="officeSelector">Office</label>
+                    <select multiple class="form-control" id="officeSelector">
+                        <option>Tokyo</option>
+                        <option>London</option>
+                        <option>San Francisco</option>
+                        <option>New York</option>
+                        <option>Edinburgh</option>
+                        <option>Sidney</option>
+                        <option>Singapore</option>
+                        <option value="NULL">Without office</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="officeSelector">Salary</label>
+                    <input type="number" min="0" class="form-control" id="minSalary" placeholder="From">
+                    <input type="number" min="0" class="form-control" id="maxSalary" placeholder="To">
+                </div>
+            </form>
+        </div>
+
+        <table id="employees" class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Position</th>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Office</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="js/jquery.spring-friendly.js"></script>
+    <script>
+        var table = $('table#employees').DataTable({
+            ajax: '/employees-advanced',
+            serverSide: true,
+            columns: [
+                {
+                    data: 'id'
+                },
+                {
+                    data: 'firstName'
+                },
+                {
+                    data: 'lastName'
+                },
+                {
+                    data: 'position'
+                },
+                {
+                    data: 'age'
+                },
+                {
+                    data: 'salary',
+                    searchable: false,
+                    render: function (data) { return data + '$'; }
+                },
+                {
+                    data: 'office.city',
+                    render: function (data) { return data ? data : '-'; }
+                }
+            ]
+        });
+
+        $('select#officeSelector').change(function() {
+            var filter = '';
+            $('select#officeSelector option:selected').each(function() {
+                filter += $(this).text() + "+";
+            });
+            filter = filter.substring(0, filter.length - 1);
+            table.column(6).search(filter).draw();
+        });
+
+        var minSalaryInput = $('input#minSalary');
+        var maxSalaryInput = $('input#maxSalary');
+
+        var onBoundChange = function () {
+            table.column(5).search(minSalaryInput.val() + ';' + maxSalaryInput.val()).draw();
+        };
+
+        minSalaryInput.on('input', onBoundChange);
+        maxSalaryInput.on('input', onBoundChange);
+
+    </script>
+
+</body>
+</html>
