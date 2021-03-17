@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.2/css/select.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchpanes/1.2.1/css/searchPanes.dataTables.min.css"/>
 
     <title>DataTables</title>
 </head>
@@ -26,8 +28,8 @@
                     <li><a href="with-post.html">With POST</a></li>
                     <li><a href="advanced.html">Advanced</a></li>
                     <li><a href="scroller.html">Scroller</a></li>
-                    <li class="active"><a href="rendered-column.html">Rendered column <span class="sr-only">(current)</span></a></li>
-                    <li><a href="searchpanes-basic.html">SearchPanes (basic)</a></li>
+                    <li><a href="rendered-column.html">Rendered column</a></li>
+                    <li class="active"><a href="searchpanes-basic.html">SearchPanes (basic) <span class="sr-only">(current)</span></a></li>
                     <li><a href="searchpanes-range.html">SearchPanes (range)</a></li>
                 </ul>
             </div>
@@ -39,7 +41,8 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>FullName (rendered)</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
                     <th>Position</th>
                     <th>Age</th>
                     <th>Salary</th>
@@ -52,21 +55,24 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/select/1.3.2/js/dataTables.select.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/searchpanes/1.2.2/js/dataTables.searchPanes.min.js"></script>
 
     <script type="text/javascript" src="js/jquery.spring-friendly.js"></script>
     <script>
         $('table#employees').DataTable({
-            ajax: '/employees-rendered-column',
+            ajax: '/employees-searchpanes-basic',
             serverSide: true,
+            dom: 'Pfrtip',
             columns: [
                 {
                     data: 'id'
                 },
                 {
-                    data: 'fullName',
-                    render: (_, __, row) => `${row.firstName} ${row.lastName}`,
-                    searchable: false,
-                    orderable: false
+                    data: 'firstName'
+                },
+                {
+                    data: 'lastName'
                 },
                 {
                     data: 'position'

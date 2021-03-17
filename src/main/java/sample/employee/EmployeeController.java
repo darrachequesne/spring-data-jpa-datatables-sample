@@ -1,25 +1,24 @@
 package sample.employee;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.SearchPanes;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
 import javax.validation.Valid;
+import java.util.*;
 
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
+@RequiredArgsConstructor
 public class EmployeeController {
-    private EmployeeRepository employeeRepository;
-
-    public EmployeeController(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
-    }
+    private final EmployeeRepository employeeRepository;
+    private final EntityManager entityManager;
 
     @RequestMapping(value = "/employees", method = RequestMethod.GET)
     public DataTablesOutput<Employee> list(@Valid DataTablesInput input) {
@@ -124,6 +123,95 @@ public class EmployeeController {
         public Predicate toPredicate(Root<Employee> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
             return criteriaBuilder.notEqual(root.get("position"), "Analyst");
         }
+    }
+
+    @RequestMapping(value = "/employees-searchpanes-basic", method = RequestMethod.GET)
+    public DataTablesOutput<Employee> listWithBasicSearchPanes(@Valid DataTablesInput input, @RequestParam Map<String, String> queryParameters) {
+        input.parseSearchPanesFromQueryParams(queryParameters, Arrays.asList("position", "age"));
+        return employeeRepository.findAll(input);
+    }
+
+    @RequestMapping(value = "/employees-searchpanes-range", method = RequestMethod.GET)
+    public DataTablesOutput<Employee> listWithAdvancedSearchPanes(@Valid DataTablesInput input, @RequestParam Map<String, String> queryParameters) {
+        input.parseSearchPanesFromQueryParams(queryParameters, Arrays.asList("position", "salary"));
+
+        Set<String> salaryRanges = input.getSearchPanes().remove("salary");
+        Specification<Employee> salarySpecification = createSalarySpecification(salaryRanges);
+
+        DataTablesOutput<Employee> output = employeeRepository.findAll(input, salarySpecification);
+        output.getSearchPanes().getOptions().put("salary", computeSalaryRanges());
+
+        return output;
+    }
+
+    private Specification<Employee> createSalarySpecification(Set<String> salaryRanges) {
+        if (salaryRanges.isEmpty()) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            salaryRanges.forEach(range -> {
+                Path<Long> salary = root.get("salary");
+                switch (range) {
+                    case "< 300 000":
+                        predicates.add(criteriaBuilder.lessThan(salary, 300_000L));
+                        break;
+                    case "300 000 <= ... < 500 000":
+                        predicates.add(
+                                criteriaBuilder.and(
+                                        criteriaBuilder.greaterThanOrEqualTo(salary, 300_000L),
+                                        criteriaBuilder.lessThan(salary, 500_000L)
+                                )
+                        );
+                        break;
+                    case "500 000 <= ... < 700 000":
+                        predicates.add(
+                                criteriaBuilder.and(
+                                        criteriaBuilder.greaterThanOrEqualTo(salary, 500_000L),
+                                        criteriaBuilder.lessThan(salary, 700_000L)
+                                )
+                        );
+                        break;
+                    case ">= 700 000":
+                        predicates.add(criteriaBuilder.greaterThanOrEqualTo(salary, 700_000L));
+                        break;
+                }
+            });
+            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private List<SearchPanes.Item> computeSalaryRanges() {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> query = criteriaBuilder.createQuery(Object[].class);
+
+        Root<Employee> root = query.from(Employee.class);
+        Expression<Long> salary = root.get("salary").as(Long.class);
+
+        Expression<Object> salaryRange = criteriaBuilder.selectCase()
+                .when(criteriaBuilder.lessThan(salary, 300_000L), "< 300 000")
+                .when(criteriaBuilder.and(
+                        criteriaBuilder.greaterThanOrEqualTo(salary, 300_000L),
+                        criteriaBuilder.lessThan(salary, 500_000L)
+                ), "300 000 <= ... < 500 000")
+                .when(criteriaBuilder.and(
+                        criteriaBuilder.greaterThanOrEqualTo(salary, 500_000L),
+                        criteriaBuilder.lessThan(salary, 700_000L)
+                ), "500 000 <= ... < 700 000")
+                .when(criteriaBuilder.greaterThanOrEqualTo(salary, 700_000L), ">= 700 000");
+
+        query.multiselect(salaryRange, criteriaBuilder.count(root));
+        query.groupBy(salaryRange);
+
+        List<SearchPanes.Item> items = new ArrayList<>();
+
+        this.entityManager.createQuery(query).getResultList().forEach(objects -> {
+            String value = String.valueOf(objects[0]);
+            long count = (long) objects[1];
+            items.add(new SearchPanes.Item(value, value, count, count));
+        });
+
+        return items;
     }
 
 }
