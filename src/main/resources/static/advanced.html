@@ -68,6 +68,7 @@
                     <th>Age</th>
                     <th>Salary</th>
                     <th>Office</th>
+                    <th>Sex</th>
                 </tr>
             </thead>
         </table>
@@ -106,6 +107,9 @@
                 {
                     data: 'office.city',
                     render: function (data) { return data ? data : '-'; }
+                },
+                {
+                    data: 'sex'
                 }
             ]
         });

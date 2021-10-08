@@ -25,4 +25,11 @@ public class Employee {
     @JoinColumn(name = "id_office")
     private Office office;
 
+    @Enumerated(EnumType.STRING)
+    private Sex sex;
+
+    enum Sex {
+        MALE,
+        FEMALE
+    }
 }
