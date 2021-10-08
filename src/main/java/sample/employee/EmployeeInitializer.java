@@ -31,6 +31,7 @@ class EmployeeInitializer {
                     .age(randomGenerator.nextInt(50) + 20)
                     .salary(randomGenerator.nextInt(20000) * 50)
                     .office(OFFICES[randomGenerator.nextInt(OFFICES.length)])
+                    .sex(Employee.Sex.values()[randomGenerator.nextInt(Employee.Sex.values().length)])
                     .build();
             employeeRepository.save(employee);
         }
