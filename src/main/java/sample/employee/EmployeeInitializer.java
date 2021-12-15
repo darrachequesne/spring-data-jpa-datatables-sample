@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.util.Random;
 
 @Service
@@ -31,6 +32,7 @@ class EmployeeInitializer {
                     .age(randomGenerator.nextInt(50) + 20)
                     .salary(randomGenerator.nextInt(20000) * 50)
                     .office(OFFICES[randomGenerator.nextInt(OFFICES.length)])
+                    .firstDay(LocalDate.now().minusDays(randomGenerator.nextInt(3650)))
                     .build();
             employeeRepository.save(employee);
         }

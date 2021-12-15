@@ -55,6 +55,11 @@
                     <input type="number" min="0" class="form-control" id="minSalary" placeholder="From">
                     <input type="number" min="0" class="form-control" id="maxSalary" placeholder="To">
                 </div>
+                <div class="form-group col-md-3">
+                    <label>First day at company</label>
+                    <input type="date" class="form-control" id="minFirstDay" placeholder="From">
+                    <input type="date" class="form-control" id="maxFirstDay" placeholder="To">
+                </div>
             </form>
         </div>
 
@@ -67,6 +72,7 @@
                     <th>Position</th>
                     <th>Age</th>
                     <th>Salary</th>
+                    <th>First day</th>
                     <th>Office</th>
                 </tr>
             </thead>
@@ -104,6 +110,9 @@
                     render: function (data) { return data + '$'; }
                 },
                 {
+                    data: 'firstDay'
+                },
+                {
                     data: 'office.city',
                     render: function (data) { return data ? data : '-'; }
                 }
@@ -128,6 +137,16 @@
 
         minSalaryInput.on('input', onBoundChange);
         maxSalaryInput.on('input', onBoundChange);
+
+        var minFirstDay = $('input#minFirstDay');
+        var maxFirstDay = $('input#maxFirstDay');
+
+        var onDateBoundChange = function () {
+            table.column(6).search(minFirstDay.val() + ';' + maxFirstDay.val()).draw();
+        };
+
+        minFirstDay.on('input', onDateBoundChange);
+        maxFirstDay.on('input', onDateBoundChange);
 
     </script>
 

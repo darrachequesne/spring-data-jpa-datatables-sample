@@ -3,6 +3,7 @@ package sample.employee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.datatables.mapping.SearchPanes;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -32,7 +34,9 @@ public class EmployeeController {
 
     @RequestMapping(value = "/employees-advanced", method = RequestMethod.GET)
     public DataTablesOutput<Employee> listAdvanced(@Valid DataTablesInput input) {
-        return employeeRepository.findAll(input, new SalarySpecification(input), new ExcludeAnalystsSpecification());
+        SalarySpecification salarySpecification = new SalarySpecification(input);
+        FirstDaySpecification firstDaySpecification = new FirstDaySpecification(input);
+        return employeeRepository.findAll(input, salarySpecification.and(firstDaySpecification), new ExcludeAnalystsSpecification());
     }
 
     @RequestMapping(value = "/employees-rendered-column", method = RequestMethod.GET)
@@ -112,6 +116,49 @@ public class EmployeeController {
                 return criteriaBuilder.greaterThanOrEqualTo(salary, minSalary);
             } else if (maxSalary != null) {
                 return criteriaBuilder.lessThanOrEqualTo(salary, maxSalary);
+            } else {
+                return criteriaBuilder.conjunction();
+            }
+        }
+    }
+
+    private static class FirstDaySpecification implements Specification<Employee> {
+        private final LocalDate minFirstDay;
+        private final LocalDate maxFirstDay;
+
+        FirstDaySpecification(DataTablesInput input) {
+            Search columnSearch = input.getColumn("firstDay").getSearch();
+            String dateFilter = columnSearch.getValue();
+            columnSearch.setValue("");
+            if (!hasText(dateFilter)) {
+                minFirstDay = maxFirstDay = null;
+                return;
+            }
+            String[] bounds = dateFilter.split(";");
+            minFirstDay = getValue(bounds, 0);
+            maxFirstDay = getValue(bounds, 1);
+        }
+
+        private LocalDate getValue(String[] bounds, int index) {
+            if (bounds.length > index && hasText(bounds[index])) {
+                try {
+                    return LocalDate.parse(bounds[index]);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Predicate toPredicate(Root<Employee> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+            Expression<LocalDate> firstDay = root.get("firstDay").as(LocalDate.class);
+            if (minFirstDay != null && maxFirstDay != null) {
+                return criteriaBuilder.between(firstDay, minFirstDay, maxFirstDay);
+            } else if (minFirstDay != null) {
+                return criteriaBuilder.greaterThanOrEqualTo(firstDay, minFirstDay);
+            } else if (maxFirstDay != null) {
+                return criteriaBuilder.lessThanOrEqualTo(firstDay, maxFirstDay);
             } else {
                 return criteriaBuilder.conjunction();
             }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -20,6 +21,7 @@ public class Employee {
     private String position;
     private int age;
     private int salary;
+    private LocalDate firstDay;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_office")
