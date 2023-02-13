@@ -8,10 +8,11 @@ import org.springframework.data.jpa.datatables.mapping.SearchPanes;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
-import javax.validation.Valid;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -143,7 +144,7 @@ public class EmployeeController {
             if (bounds.length > index && hasText(bounds[index])) {
                 try {
                     return LocalDate.parse(bounds[index]);
-                } catch (NumberFormatException e) {
+                } catch (DateTimeParseException e) {
                     return null;
                 }
             }
